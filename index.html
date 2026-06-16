@@ -1,0 +1,1566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Philippines Earthquake Crisis Dashboard | Meltwater Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+  :root {
+    --mw-teal: #28BBBB;
+    --mw-teal-dark: #1C7070;
+    --mw-teal-medium: #00A7A5;
+    --mw-teal-tint-1: #A3DFDF;
+    --mw-teal-tint-2: #C0EBEB;
+    --mw-teal-tint-3: #E1EFF0;
+    --mw-white: #FFFFFF;
+    --mw-black: #1A1A1A;
+    --mw-gray: #F0F4F4;
+    --mw-orange: #FF6221;
+    --mw-orange-tint: #FFDDCC;
+    --mw-yellow: #FFCC01;
+    --mw-purple: #B627A1;
+    --bg: var(--mw-white);
+    --bg-soft: var(--mw-gray);
+    --bg-brand: var(--mw-teal);
+    --bg-brand-soft: var(--mw-teal-tint-3);
+    --fg: var(--mw-black);
+    --fg-muted: #555555;
+    --fg-subtle: #8A9494;
+    --fg-brand: var(--mw-teal-dark);
+    --fg-on-brand: var(--mw-white);
+    --border: #D7E1E1;
+    --divider: #E8EDED;
+    --danger: #C0392B;
+    --danger-pale: #FDECEA;
+    --warning: #E67E22;
+    --warning-pale: #FEF0E3;
+    --success: #1C7070;
+    --success-pale: #E1EFF0;
+    --shadow-sm: 0 2px 6px rgba(26,26,26,.06);
+    --shadow-md: 0 6px 18px rgba(26,26,26,.08);
+    --shadow-lg: 0 16px 40px rgba(26,26,26,.10);
+    --r-sm: 4px;
+    --r-md: 8px;
+    --r-lg: 12px;
+    --r-pill: 999px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Poppins', system-ui, sans-serif;
+    background: #F2F4F6;
+    color: var(--fg);
+    font-size: 14px;
+    line-height: 1.55;
+  }
+
+  /* ===== ALERT BANNER ===== */
+  .alert-banner {
+    background: #B71C1C;
+    color: white;
+    padding: 12px 32px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+  .alert-badge {
+    background: white;
+    color: #B71C1C;
+    border-radius: var(--r-pill);
+    padding: 3px 12px;
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+  .alert-banner-text { flex: 1; }
+
+  /* ===== HEADER ===== */
+  .header {
+    background: var(--mw-black);
+    padding: 0 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+    border-bottom: 2px solid var(--mw-teal);
+  }
+  .logo-area { display: flex; align-items: center; gap: 16px; }
+  .logo-text {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--mw-teal);
+    letter-spacing: -0.02em;
+  }
+  .logo-divider { width: 1px; height: 28px; background: #333; }
+  .header-title { font-size: 13px; color: #aaa; font-weight: 400; }
+  .header-meta { display: flex; align-items: center; gap: 8px; }
+  .header-pill {
+    background: #2a2a2a;
+    color: #ccc;
+    border-radius: var(--r-pill);
+    padding: 4px 12px;
+    font-size: 11px;
+    font-weight: 500;
+  }
+  .header-pill.live {
+    background: #C0392B;
+    color: white;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+
+  /* ===== HERO ===== */
+  .hero {
+    background: linear-gradient(135deg, #1A0A0A 0%, #2D1212 35%, #1C4040 100%);
+    padding: 48px 32px 0;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -80px;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(40,187,187,0.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero::after {
+    content: '';
+    position: absolute;
+    bottom: 40px; left: -40px;
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, rgba(192,57,43,0.10) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-inner { max-width: 1200px; margin: 0 auto; position: relative; z-index: 1; }
+  .hero-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--mw-teal);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .hero-label::before {
+    content: '';
+    display: inline-block;
+    width: 24px; height: 2px;
+    background: var(--mw-teal);
+  }
+  .hero h1 {
+    font-size: clamp(28px, 4vw, 48px);
+    font-weight: 900;
+    color: white;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    margin-bottom: 12px;
+  }
+  .hero h1 span { color: var(--mw-teal); }
+  .hero-sub {
+    font-size: 15px;
+    color: rgba(255,255,255,0.65);
+    font-weight: 400;
+    margin-bottom: 40px;
+    max-width: 700px;
+  }
+
+  /* KPI Strip */
+  .kpi-strip {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 0;
+    background: rgba(0,0,0,0.4);
+    border-top: 1px solid rgba(255,255,255,0.08);
+    margin: 0 -32px;
+    padding: 0 32px;
+  }
+  .kpi-tile {
+    padding: 20px 16px;
+    border-right: 1px solid rgba(255,255,255,0.08);
+    text-align: center;
+  }
+  .kpi-tile:last-child { border-right: none; }
+  .kpi-number {
+    font-size: 28px;
+    font-weight: 800;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .kpi-number.red { color: #EF5350; }
+  .kpi-number.orange { color: #FF8A65; }
+  .kpi-number.teal { color: var(--mw-teal); }
+  .kpi-number.yellow { color: var(--mw-yellow); }
+  .kpi-number.white { color: white; }
+  .kpi-label {
+    font-size: 10px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.5);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  /* ===== MAIN CONTENT ===== */
+  .main { max-width: 1240px; margin: 0 auto; padding: 32px 16px; }
+
+  /* ===== SECTION HEADING ===== */
+  .section-heading {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    margin-top: 40px;
+  }
+  .section-heading:first-child { margin-top: 0; }
+  .section-icon {
+    width: 36px; height: 36px;
+    border-radius: var(--r-md);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .section-heading h2 {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--mw-black);
+    letter-spacing: -0.01em;
+  }
+  .section-heading p {
+    font-size: 12px;
+    color: var(--fg-subtle);
+    margin-top: 1px;
+  }
+  .section-rule {
+    flex: 1;
+    height: 1px;
+    background: var(--divider);
+  }
+  .count-badge {
+    background: var(--bg-brand-soft);
+    color: var(--fg-brand);
+    border-radius: var(--r-pill);
+    padding: 3px 10px;
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  /* ===== CRISIS GRID ===== */
+  .crisis-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 8px;
+  }
+  .crisis-card {
+    background: white;
+    border-radius: var(--r-lg);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    transition: box-shadow 0.2s;
+  }
+  .crisis-card:hover { box-shadow: var(--shadow-md); }
+  .crisis-card-header {
+    padding: 16px 20px 14px;
+    border-bottom: 1px solid var(--divider);
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+  }
+  .crisis-icon {
+    width: 44px; height: 44px;
+    border-radius: var(--r-md);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+  }
+  .crisis-card-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--mw-black);
+    line-height: 1.3;
+  }
+  .crisis-card-subtitle {
+    font-size: 11px;
+    color: var(--fg-subtle);
+    margin-top: 2px;
+  }
+  .severity-badge {
+    margin-left: auto;
+    padding: 3px 10px;
+    border-radius: var(--r-pill);
+    font-size: 10px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+  .sev-critical { background: #FDECEA; color: #C62828; }
+  .sev-high { background: #FEF0E3; color: #E65100; }
+  .sev-medium { background: #FFF8E1; color: #E65100; }
+  .sev-watch { background: #E3F2FD; color: #1565C0; }
+  .sev-improving { background: var(--bg-brand-soft); color: var(--fg-brand); }
+
+  .crisis-card-body { padding: 16px 20px; }
+  .crisis-stat-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 14px;
+    gap: 8px;
+  }
+  .crisis-stat {
+    flex: 1;
+    background: var(--bg-soft);
+    border-radius: var(--r-md);
+    padding: 10px 12px;
+    text-align: center;
+  }
+  .crisis-stat-num {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--mw-teal-dark);
+    line-height: 1;
+    margin-bottom: 3px;
+  }
+  .crisis-stat-lbl {
+    font-size: 9px;
+    font-weight: 600;
+    color: var(--fg-subtle);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .crisis-items { list-style: none; }
+  .crisis-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 9px 0;
+    border-bottom: 1px solid var(--divider);
+    font-size: 12px;
+    color: var(--fg-muted);
+    line-height: 1.45;
+  }
+  .crisis-item:last-child { border-bottom: none; padding-bottom: 0; }
+  .crisis-item-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    margin-top: 5px;
+    flex-shrink: 0;
+  }
+  .dot-red { background: #EF5350; }
+  .dot-orange { background: #FF7043; }
+  .dot-teal { background: var(--mw-teal); }
+  .dot-green { background: #43A047; }
+  .progress-bar-wrap {
+    background: var(--divider);
+    border-radius: var(--r-pill);
+    height: 6px;
+    margin-top: 12px;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    border-radius: var(--r-pill);
+    transition: width 1s ease;
+  }
+  .progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    color: var(--fg-subtle);
+    margin-top: 4px;
+    font-weight: 500;
+  }
+
+  /* Location chips */
+  .location-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 10px;
+  }
+  .location-chip {
+    background: var(--bg-brand-soft);
+    color: var(--fg-brand);
+    border-radius: var(--r-pill);
+    padding: 4px 10px;
+    font-size: 10px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .location-chip.active {
+    background: #FDECEA;
+    color: #C62828;
+  }
+  .location-chip.partial {
+    background: #FEF0E3;
+    color: #E65100;
+  }
+  .location-chip.restored {
+    background: #E8F5E9;
+    color: #2E7D32;
+  }
+
+  /* ===== GOVT RESPONSE ===== */
+  .govt-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+  }
+  .govt-card {
+    background: white;
+    border-radius: var(--r-lg);
+    box-shadow: var(--shadow-sm);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    border-top: 3px solid transparent;
+    transition: box-shadow 0.2s;
+  }
+  .govt-card:hover { box-shadow: var(--shadow-md); }
+  .govt-card.active { border-top-color: var(--mw-teal); }
+  .govt-card.urgent { border-top-color: #C62828; }
+  .govt-card.monitoring { border-top-color: var(--mw-yellow); }
+  .govt-card.completed { border-top-color: #43A047; }
+  .govt-card-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .govt-label-active { color: var(--mw-teal-dark); }
+  .govt-label-urgent { color: #C62828; }
+  .govt-label-monitoring { color: #E65100; }
+  .govt-label-completed { color: #2E7D32; }
+  .govt-agency-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--mw-black);
+    line-height: 1.3;
+  }
+  .govt-agency-full {
+    font-size: 11px;
+    color: var(--fg-subtle);
+    margin-top: 1px;
+  }
+  .govt-status-item {
+    font-size: 11px;
+    color: var(--fg-muted);
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    line-height: 1.4;
+  }
+  .govt-status-item::before {
+    content: '→';
+    color: var(--mw-teal);
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .govt-funding {
+    background: var(--bg-brand-soft);
+    border-radius: var(--r-md);
+    padding: 8px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--fg-brand);
+    text-align: center;
+  }
+
+  /* ===== TIMELINE ===== */
+  .timeline { position: relative; padding-left: 28px; }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 10px; top: 8px; bottom: 8px;
+    width: 2px;
+    background: linear-gradient(180deg, #C62828, var(--mw-yellow), var(--mw-teal));
+    border-radius: 2px;
+  }
+  .timeline-event {
+    position: relative;
+    margin-bottom: 20px;
+    background: white;
+    border-radius: var(--r-lg);
+    padding: 14px 18px;
+    box-shadow: var(--shadow-sm);
+  }
+  .timeline-dot {
+    position: absolute;
+    left: -22px;
+    top: 18px;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    border: 2px solid white;
+    box-shadow: 0 0 0 2px currentColor;
+  }
+  .tl-red { color: #C62828; background: #C62828; }
+  .tl-orange { color: #E65100; background: #E65100; }
+  .tl-yellow { color: #F57C00; background: #F57C00; }
+  .tl-teal { color: var(--mw-teal); background: var(--mw-teal); }
+  .tl-green { color: #43A047; background: #43A047; }
+  .timeline-time {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--fg-subtle);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 4px;
+  }
+  .timeline-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--mw-black);
+    margin-bottom: 4px;
+  }
+  .timeline-desc {
+    font-size: 11px;
+    color: var(--fg-muted);
+    line-height: 1.5;
+  }
+  .timeline-tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: var(--r-pill);
+    font-size: 10px;
+    font-weight: 600;
+    margin-top: 6px;
+  }
+
+  /* ===== MEDIA COVERAGE ===== */
+  .coverage-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    gap: 16px;
+  }
+  .chart-card {
+    background: white;
+    border-radius: var(--r-lg);
+    box-shadow: var(--shadow-sm);
+    padding: 20px;
+  }
+  .chart-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--mw-black);
+    margin-bottom: 4px;
+  }
+  .chart-sub {
+    font-size: 11px;
+    color: var(--fg-subtle);
+    margin-bottom: 16px;
+  }
+  .chart-wrap { position: relative; }
+  .sentiment-list { list-style: none; }
+  .sentiment-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--divider);
+    font-size: 12px;
+  }
+  .sentiment-item:last-child { border-bottom: none; }
+  .sentiment-swatch {
+    width: 10px; height: 10px;
+    border-radius: 2px;
+    margin-right: 8px;
+    flex-shrink: 0;
+    display: inline-block;
+  }
+  .sentiment-label { flex: 1; color: var(--fg-muted); display: flex; align-items: center; }
+  .sentiment-pct { font-weight: 700; color: var(--mw-black); }
+
+  /* Source cards */
+  .source-list { list-style: none; }
+  .source-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 0;
+    border-bottom: 1px solid var(--divider);
+    font-size: 12px;
+  }
+  .source-item:last-child { border-bottom: none; }
+  .source-rank {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: var(--bg-brand-soft);
+    color: var(--fg-brand);
+    font-size: 10px;
+    font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .source-name { font-weight: 600; color: var(--mw-black); }
+  .source-country { font-size: 10px; color: var(--fg-subtle); }
+  .source-reach { margin-left: auto; font-weight: 700; color: var(--fg-brand); font-size: 11px; }
+
+  /* ===== RECOMMENDATIONS ===== */
+  .rec-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+  .rec-card {
+    background: white;
+    border-radius: var(--r-lg);
+    box-shadow: var(--shadow-sm);
+    padding: 20px;
+    border-left: 4px solid var(--mw-teal);
+  }
+  .rec-card.urgent { border-left-color: #C62828; }
+  .rec-card.watch { border-left-color: var(--mw-yellow); }
+  .rec-num {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--fg-subtle);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .rec-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--mw-black);
+    margin-bottom: 8px;
+    line-height: 1.3;
+  }
+  .rec-body {
+    font-size: 12px;
+    color: var(--fg-muted);
+    line-height: 1.55;
+  }
+
+  /* ===== FOOTER ===== */
+  .dash-footer {
+    background: var(--mw-black);
+    color: #666;
+    padding: 20px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 11px;
+    margin-top: 48px;
+  }
+  .footer-left { display: flex; align-items: center; gap: 16px; }
+  .footer-logo { font-size: 14px; font-weight: 800; color: var(--mw-teal); }
+  .footer-right { color: #444; }
+
+  /* ===== UTILITIES ===== */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .three-col { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .full-card {
+    background: white;
+    border-radius: var(--r-lg);
+    box-shadow: var(--shadow-sm);
+    padding: 20px;
+  }
+
+  /* ===== AFFECTED AREAS ===== */
+  .area-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+  }
+  .area-card {
+    background: white;
+    border-radius: var(--r-md);
+    box-shadow: var(--shadow-sm);
+    padding: 14px 16px;
+    border-left: 3px solid var(--mw-teal);
+  }
+  .area-card.critical { border-left-color: #C62828; }
+  .area-card.high { border-left-color: #E65100; }
+  .area-name {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--mw-black);
+    margin-bottom: 8px;
+  }
+  .area-stat { font-size: 11px; color: var(--fg-muted); margin-bottom: 3px; }
+  .area-stat strong { color: var(--mw-black); font-weight: 700; }
+  .area-severity {
+    margin-top: 8px;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: var(--r-pill);
+    display: inline-block;
+    text-transform: uppercase;
+  }
+
+  /* Highlight box */
+  .highlight-box {
+    background: var(--bg-brand-soft);
+    border: 1px solid var(--mw-teal-tint-1);
+    border-radius: var(--r-lg);
+    padding: 16px 20px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .highlight-icon { font-size: 24px; flex-shrink: 0; }
+  .highlight-text { font-size: 13px; color: var(--fg-brand); font-weight: 500; line-height: 1.5; }
+  .highlight-text strong { font-weight: 700; color: var(--mw-teal-dark); }
+
+  /* Tab navigation */
+  .tab-nav {
+    display: flex;
+    gap: 4px;
+    background: white;
+    border-radius: var(--r-lg);
+    padding: 6px;
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .tab-btn {
+    padding: 8px 16px;
+    border-radius: var(--r-md);
+    border: none;
+    background: transparent;
+    font-family: 'Poppins', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--fg-subtle);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .tab-btn:hover { background: var(--bg-soft); color: var(--fg); }
+  .tab-btn.active {
+    background: var(--mw-teal);
+    color: white;
+  }
+  .tab-count {
+    background: rgba(255,255,255,0.3);
+    border-radius: var(--r-pill);
+    padding: 1px 6px;
+    font-size: 10px;
+  }
+  .tab-btn:not(.active) .tab-count {
+    background: var(--divider);
+    color: var(--fg-subtle);
+  }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  @media (max-width: 900px) {
+    .crisis-grid { grid-template-columns: 1fr 1fr; }
+    .govt-grid { grid-template-columns: 1fr 1fr; }
+    .kpi-strip { grid-template-columns: repeat(3, 1fr); }
+    .area-grid { grid-template-columns: 1fr 1fr; }
+    .coverage-row { grid-template-columns: 1fr; }
+    .rec-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Alert Banner -->
+<div class="alert-banner">
+  <span>⚠</span>
+  <span class="alert-badge">CRITICAL — ACTIVE CRISIS</span>
+  <span class="alert-banner-text">
+    Magnitude 7.8 earthquake struck Mindanao, Philippines on 8 June 2026 · 69+ fatalities · 346,449 individuals affected · Aftershocks ongoing (Mag. 6.7 recorded) · Crisis response active across 4 regions
+  </span>
+  <span style="color:rgba(255,255,255,0.6); font-size:11px; white-space:nowrap;">Updated: 16 Jun 2026</span>
+</div>
+
+<!-- Header -->
+<header class="header">
+  <div class="logo-area">
+    <span class="logo-text">⬡ Meltwater</span>
+    <div class="logo-divider"></div>
+    <span class="header-title">Crisis Intelligence Dashboard</span>
+  </div>
+  <div class="header-meta">
+    <span class="header-pill live">● LIVE</span>
+    <span class="header-pill">Philippines Earthquake — Mindanao</span>
+    <span class="header-pill">8–16 Jun 2026</span>
+    <span class="header-pill">Powered by Mira</span>
+  </div>
+</header>
+
+<!-- Hero -->
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-label">Media Intelligence · Issues & Crisis Report</div>
+    <h1>🇵🇭 Philippines Earthquake Crisis<br><span>Mindanao — M7.8 Sarangani</span></h1>
+    <p class="hero-sub">Comprehensive crisis intelligence covering rescue operations, humanitarian response, infrastructure damage, student safety, and government mobilisation across Sarangani, SOCCSKSARGEN, Davao, Zamboanga Peninsula, and BARMM</p>
+    <div class="kpi-strip">
+      <div class="kpi-tile">
+        <div class="kpi-number red">69+</div>
+        <div class="kpi-label">Confirmed Fatalities</div>
+      </div>
+      <div class="kpi-tile">
+        <div class="kpi-number orange">200+</div>
+        <div class="kpi-label">Injured</div>
+      </div>
+      <div class="kpi-tile">
+        <div class="kpi-number yellow">346K</div>
+        <div class="kpi-label">Individuals Affected</div>
+      </div>
+      <div class="kpi-tile">
+        <div class="kpi-number white">58,576</div>
+        <div class="kpi-label">Homes Damaged</div>
+      </div>
+      <div class="kpi-tile">
+        <div class="kpi-number teal">4M</div>
+        <div class="kpi-label">Students Displaced</div>
+      </div>
+      <div class="kpi-tile">
+        <div class="kpi-number orange">130+</div>
+        <div class="kpi-label">Aftershocks Recorded</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Main -->
+<div class="main">
+
+  <!-- Highlight note -->
+  <div class="highlight-box" style="margin-top: 32px;">
+    <span class="highlight-icon">📅</span>
+    <span class="highlight-text">
+      <strong>Struck on the first day of the school year (June 8, 2026)</strong> at 7:37 AM as students were attending flag ceremonies — compounding the human impact and triggering an unprecedented school-safety crisis. PHIVOLCS warns aftershocks may continue for <strong>over one month</strong>.
+    </span>
+  </div>
+
+  <!-- ===== CRISIS CATEGORIES ===== -->
+  <div class="section-heading">
+    <div class="section-icon" style="background:#FDECEA;">🚨</div>
+    <div>
+      <h2>Crisis categories</h2>
+      <p>Six active issue streams tracked across affected regions</p>
+    </div>
+    <div class="section-rule"></div>
+    <span class="count-badge">6 categories</span>
+  </div>
+
+  <div class="crisis-grid">
+
+    <!-- 1. Rescue Operations -->
+    <div class="crisis-card">
+      <div class="crisis-card-header">
+        <div class="crisis-icon" style="background:#FDECEA;">🔴</div>
+        <div>
+          <div class="crisis-card-title">Rescue operations</div>
+          <div class="crisis-card-subtitle">Search, rescue & retrieval (SRR)</div>
+        </div>
+        <span class="severity-badge sev-critical">Critical</span>
+      </div>
+      <div class="crisis-card-body">
+        <div class="crisis-stat-row">
+          <div class="crisis-stat">
+            <div class="crisis-stat-num" style="color:#C62828;">69+</div>
+            <div class="crisis-stat-lbl">Confirmed Dead</div>
+          </div>
+          <div class="crisis-stat">
+            <div class="crisis-stat-num" style="color:#E65100;">200+</div>
+            <div class="crisis-stat-lbl">Injured</div>
+          </div>
+          <div class="crisis-stat">
+            <div class="crisis-stat-num">∞</div>
+            <div class="crisis-stat-lbl">Missing</div>
+          </div>
+        </div>
+        <ul class="crisis-items">
+          <li class="crisis-item"><span class="crisis-item-dot dot-red"></span>Building collapses in General Santos City — trapped survivors under debris</li>
+          <li class="crisis-item"><span class="crisis-item-dot dot-red"></span>Landslides blocking access to remote barangays in Sarangani & South Cotabato</li>
+          <li class="crisis-item"><span class="crisis-item-dot dot-orange"></span>OCD, AFP, and PNP SRR teams deployed across 4 regions</li>
+          <li class="crisis-item"><span class="crisis-item-dot dot-teal"></span>Government officially concluded active rescue phase — focus shifts to displaced</li>
+        </ul>
+        <div class="location-chips">
+          <span class="location-chip active">📍 General Santos City</span>
+          <span class="location-chip active">📍 Sarangani</span>
+          <span class="location-chip partial">📍 South Cotabato</span>
+          <span class="location-chip partial">📍 Davao del Sur</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. Medical Assistance -->
+    <div class="crisis-card">
+      <div class="crisis-card-header">
+        <div class="crisis-icon" style="background:#FEF0E3;">🏥</div>
+        <div>
+          <div class="crisis-card-title">Medical assistance</div>
+          <div class="crisis-card-subtitle">Hospital capacity, trauma care & field medics</div>
+        </div>
+        <span class="severity-badge sev-high">High</span>
+      </div>
+      <div class="crisis-card-body">
+        <div class="crisis-stat-row">
+          <div class="crisis-stat">
+            <div class="crisis-stat-num">200+</div>
+            <div class="crisis-stat-lbl">Treated</div>
+          </div>
+          <div class="crisis-stat">
+            <div class="crisis-stat-num" style="color:#43A047;">✓</div>
+            <div class="crisis-stat-lbl">Power Restored</div>
+          </div>
+          <div class="crisis-stat">
+            <div class="crisis-stat-num">8+</div>
+            <div class="crisis-stat-lbl">Field Teams</div>
+          </div>
+        </div>
+        <ul class="crisis-items">
+          <li class="crisis-item"><span class="crisis-item-dot dot-red"></span>Hospitals lost power during quake — emergency surgeries disrupted in Koronadal</li>
+          <li class="crisis-item"><span class="crisis-item-dot dot-orange"></span>DOH deployed mobile medical teams, trauma surgeons to evacuation centres</li>
+          <li class="crisis-item"><span class="crisis-item-dot dot-teal"></span>Power supply restored to all hospitals by DOE (June 9, 1:38 PM)</li>
+          <li class="crisis-item"><span class="crisis-item-dot dot-teal"></span>DSWD mobile water filtration units active in Sarangani — preventing disease spread</li>
+        </ul>
+        <div class="location-chips">
+          <span class="location-chip restored">✓ Koronadal restored</span>
+          <span class="location-chip active">📍 GenSan hospitals</span>
+          <span class="location-chip partial">📍 Sarangani field units</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. Relief & Food Supply -->
+    <div class="crisis-card">
+      <div class="crisis-card-header">
+        <div class="crisis-icon" style="background:#FFF8E1;">🍱</div>
+        <div>
+          <div class="crisis-card-title">Relief goods & food supply</div>
+          <div class="crisis-card-subtitle">FFPs, cash aid, non-food items, hot meals</div>
+        </div>
+        <span class="severity-badge sev-medium">Ongoing</span>
+      </div>
+      <div class="crisis-card-body">
+        <div class="crisis-stat-row">
+          <div class="crisis-stat">
+            <div class="crisis-stat-num" style="color:#E65100;">182K</div>
+            <div class="crisis-stat-lbl">Food Packs Prepped</div>
+          </div>
+          <div class="crisis-stat">
+            <div class="crisis-stat-num">125K</div>
+            <div class="crisis-stat-lbl">Distributed</div>
+          </div>
+          <div class="crisis-stat">
+            <div class="crisis-stat-num" style="color:var(--mw-teal-dark);">₱125M</div>
+            <div class="crisis-stat-lbl">DSWD Released</div>
+          </div>
+        </div>
+        <ul class="crisis-items">
+          <li class="crisis-item"><span class="crisis-item-dot dot-teal"></span>DSWD pre-positioned 182,600 family food packs (FFPs) across Davao region</li>
+          <li class="crisis-item"><span class="crisis-item-dot dot-teal"></span>125,242 FFPs distributed + 7,428 ready-to-eat items + 6,990 non-food items</li>
+          <li class="crisis-item"><span class="crisis-item-dot dot-orange"></span>4 mobile kitchens providing hot meals to displaced in evacuation centres</li>
+          <li class="crisis-item"><span class="crisis-item-dot dot-teal"></span>DSWD transitioning to emergency cash transfers (ECT) alongside food aid</li>
+        </ul>
+        <div class="progress-bar-wrap">
+          <div class="progress-bar-fill" style="width:68%; background:var(--mw-teal);"></div>
+        </div>
+        <div class="progress-label">
+          <span>Food pack distribution progress</span>
+          <span style="color:var(--fg-brand); font-weight:700;">68% distributed</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. Power Restoration -->
+    <div class="crisis-card">
+      <div class="crisis-card-header">
+        <div class="crisis-icon" style="background:#E3F2FD;">⚡</div>
+        <div>
+          <div class="crisis-card-title">Power restoration</div>
+          <div class="crisis-card-subtitle">Transmission, distribution & connectivity</div>
+        </div>
+        <span class="severity-badge sev-watch">Mostly Restored</span>
+      </div>
+      <div class="crisis-card-body">
+        <div class="crisis-stat-row">
+          <div class="crisis-stat">
+            <div class="crisis-stat-num" style="color:#C62828;">26</div>
+            <div class="crisis-stat-lbl">Areas Disrupted</div>
+          </div>
+          <div class="crisis-stat">
+            <div class="crisis-stat-num" style="color:#43A047;">✓</div>
+            <div class="crisis-stat-lbl">NGCP Restored</div>
+          </div>
+          <div class="crisis-stat">
+            <div class="crisis-stat-num" style="color:#E65100;">~3</div>
+            <div class="crisis-stat-lbl">Areas Pending</div>
+          </div>
+        </div>
+        <ul class="crisis-items">
+          <li class="crisis-item"><span class="crisis-item-dot dot-red"></span>26 areas experienced power disruptions immediately after quake</li>
+          <li class="crisis-item"><span class="crisis-item-dot dot-teal"></span>NGCP restored all transmission lines by June 9 at 1:38 PM — South Cotabato, Sarangani, GenSan</li>
+          <li class="crisis-item"><span class="crisis-item-dot dot-orange"></span>Distribution network (barangay-level) still partially down in remote areas</li>
+          <li class="crisis-item"><span class="crisis-item-dot dot-teal"></span>DSWD solar power units deployed to off-grid evacuation centres in Sarangani</li>
+        </ul>
+        <div class="location-chips">
+          <span class="location-chip restored">✓ South Cotabato</span>
+          <span class="location-chip restored">✓ Sarangani (transmission)</span>
+          <span class="location-chip restored">✓ General Santos City</span>
+          <span class="location-chip partial">⚠ Remote barangays</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. Road & Infrastructure Safety -->
+    <div class="crisis-card">
+      <div class="crisis-card-header">
+        <div class="crisis-icon" style="background:#FEF0E3;">🛣️</div>
+        <div>
+          <div class="crisis-card-title">Road & infrastructure safety</div>
+          <div class="crisis-card-subtitle">Roads, bridges, airport, buildings</div>
+        </div>
+        <span class="severity-badge sev-high">High</span>
+      </div>
+      <div class="crisis-card-body">
+        <div class="crisis-stat-row">
+          <div class="crisis-stat">
+            <div class="crisis-stat-num" style="color:#C62828;">45</div>
+            <div class="crisis-stat-lbl">Road Sections Hit</div>
+          </div>
+          <div class="crisis-stat">
+            <div class="crisis-stat-num" style="color:#E65100;">8</div>
+            <div class="crisis-stat-lbl">Bridges Damaged</div>
+          </div>
+          <div class="crisis-stat">
+            <div class="crisis-stat-num">1</div>
+            <div class="crisis-stat-lbl">Airport Affected</div>
+          </div>
+        </div>
+        <ul class="crisis-items">
+          <li class="crisis-item"><span class="crisis-item-dot dot-red"></span>45 road sections and 8 bridges damaged — cutting off remote communities</li>
+          <li class="crisis-item"><span class="crisis-item-dot dot-red"></span>General Santos International Airport sustained major damage — affecting aid logistics</li>
+          <li class="crisis-item"><span class="crisis-item-dot dot-orange"></span>A key bridge in General Santos City has cracks — engineering assessment underway</li>
+          <li class="crisis-item"><span class="crisis-item-dot dot-teal"></span>DPWH teams deployed for emergency road clearing & damage assessment</li>
+        </ul>
+        <div class="location-chips">
+          <span class="location-chip active">📍 GenSan Airport</span>
+          <span class="location-chip active">📍 National Roads</span>
+          <span class="location-chip partial">📍 Provincial Roads</span>
+          <span class="location-chip partial">📍 Barangay Access</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 6. Student Safety -->
+    <div class="crisis-card">
+      <div class="crisis-card-header">
+        <div class="crisis-icon" style="background:#F3E5F5;">🎒</div>
+        <div>
+          <div class="crisis-card-title">Student & school safety</div>
+          <div class="crisis-card-subtitle">School suspensions, structural damage, DepEd response</div>
+        </div>
+        <span class="severity-badge sev-high">High</span>
+      </div>
+      <div class="crisis-card-body">
+        <div class="crisis-stat-row">
+          <div class="crisis-stat">
+            <div class="crisis-stat-num" style="color:#C62828;">4M</div>
+            <div class="crisis-stat-lbl">Students Affected</div>
+          </div>
+          <div class="crisis-stat">
+            <div class="crisis-stat-num" style="color:#E65100;">3,500</div>
+            <div class="crisis-stat-lbl">Schools Closed</div>
+          </div>
+          <div class="crisis-stat">
+            <div class="crisis-stat-num">199</div>
+            <div class="crisis-stat-lbl">Rooms Destroyed</div>
+          </div>
+        </div>
+        <ul class="crisis-items">
+          <li class="crisis-item"><span class="crisis-item-dot dot-red"></span>Quake hit on opening day — students were in flag ceremonies when tremors struck</li>
+          <li class="crisis-item"><span class="crisis-item-dot dot-red"></span>1,378 schools damaged: 199 classrooms destroyed, 296 severely damaged, 1,023 minor</li>
+          <li class="crisis-item"><span class="crisis-item-dot dot-orange"></span>3,500+ schools still closed 8+ days after quake — 8,208 schools enforced suspension</li>
+          <li class="crisis-item"><span class="crisis-item-dot dot-teal"></span>DepEd QRF (₱3B) activated; ₱43.9M for repairs + ₱7.79M for cleanup assessed</li>
+        </ul>
+        <div class="progress-bar-wrap">
+          <div class="progress-bar-fill" style="width:10%; background:#E65100;"></div>
+        </div>
+        <div class="progress-label">
+          <span>Schools reopened</span>
+          <span style="color:#E65100; font-weight:700;">818 of 8,208 resumed</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ===== AFFECTED AREAS ===== -->
+  <div class="section-heading" style="margin-top: 40px;">
+    <div class="section-icon" style="background:#E1EFF0;">🗺️</div>
+    <div>
+      <h2>Affected regions</h2>
+      <p>Displacement and damage by province / region</p>
+    </div>
+    <div class="section-rule"></div>
+  </div>
+
+  <div class="area-grid">
+    <div class="area-card critical">
+      <div class="area-name">Sarangani Province</div>
+      <div class="area-stat">Epicentre: <strong>Kablalan (26km offshore)</strong></div>
+      <div class="area-stat">Families displaced: <strong>7,279+</strong></div>
+      <div class="area-stat">Infrastructure: <strong>Severely damaged</strong></div>
+      <span class="area-severity sev-critical">Epicentre — Critical</span>
+    </div>
+    <div class="area-card critical">
+      <div class="area-name">General Santos City</div>
+      <div class="area-stat">Building collapses: <strong>Multiple</strong></div>
+      <div class="area-stat">Airport: <strong>Major damage</strong></div>
+      <div class="area-stat">Bridge cracks: <strong>Key span cracked</strong></div>
+      <span class="area-severity sev-critical">Critical</span>
+    </div>
+    <div class="area-card high">
+      <div class="area-name">South Cotabato</div>
+      <div class="area-stat">Families in evacuation: <strong>3,515</strong></div>
+      <div class="area-stat">Hospitals: <strong>Disrupted → restored</strong></div>
+      <div class="area-stat">Schools: <strong>Suspended</strong></div>
+      <span class="area-severity sev-high">High Impact</span>
+    </div>
+    <div class="area-card high">
+      <div class="area-name">Davao Region</div>
+      <div class="area-stat">DSWD pre-positioned: <strong>182,600 FFPs</strong></div>
+      <div class="area-stat">Families affected: <strong>33,000+</strong></div>
+      <div class="area-stat">Status: <strong>Aid distribution active</strong></div>
+      <span class="area-severity sev-high">High Impact</span>
+    </div>
+    <div class="area-card" style="border-left-color:#E65100;">
+      <div class="area-name">SOCCSKSARGEN</div>
+      <div class="area-stat">Schools suspended: <strong>Regional suspension</strong></div>
+      <div class="area-stat">Roads affected: <strong>Multiple sections</strong></div>
+      <div class="area-stat">Relief teams: <strong>Deployed</strong></div>
+      <span class="area-severity sev-high">Moderate–High</span>
+    </div>
+    <div class="area-card" style="border-left-color:#F57C00;">
+      <div class="area-name">Zamboanga Peninsula</div>
+      <div class="area-stat">NDRRMC coverage: <strong>Active monitoring</strong></div>
+      <div class="area-stat">Tsunami alert: <strong>Issued then lifted</strong></div>
+      <div class="area-stat">Families: <strong>Some displaced</strong></div>
+      <span class="area-severity" style="background:#FEF0E3; color:#E65100;">Moderate</span>
+    </div>
+    <div class="area-card" style="border-left-color:#F57C00;">
+      <div class="area-name">BARMM (Bangsamoro)</div>
+      <div class="area-stat">Tsunami alert: <strong>Issued → lifted</strong></div>
+      <div class="area-stat">Coastal barangays: <strong>Evacuated</strong></div>
+      <div class="area-stat">Status: <strong>Monitoring</strong></div>
+      <span class="area-severity" style="background:#FEF0E3; color:#E65100;">Moderate</span>
+    </div>
+    <div class="area-card" style="border-left-color:var(--mw-teal);">
+      <div class="area-name">Homes — Total Philippines</div>
+      <div class="area-stat">Damaged: <strong>58,576 units</strong></div>
+      <div class="area-stat">Destroyed: <strong>11,302 units</strong></div>
+      <div class="area-stat">Est. homeless: <strong>20,000+</strong></div>
+      <span class="area-severity sev-improving">Nationwide count</span>
+    </div>
+  </div>
+
+  <!-- ===== GOVERNMENT RESPONSE ===== -->
+  <div class="section-heading" style="margin-top: 40px;">
+    <div class="section-icon" style="background:#E1EFF0;">🏛️</div>
+    <div>
+      <h2>Government offices responding</h2>
+      <p>Inter-agency mobilisation status as of 16 June 2026</p>
+    </div>
+    <div class="section-rule"></div>
+    <span class="count-badge">10 agencies</span>
+  </div>
+
+  <div class="govt-grid">
+    <div class="govt-card urgent">
+      <div>
+        <div class="govt-card-label govt-label-urgent">🔴 Command</div>
+        <div class="govt-agency-name">President's Office — Marcos Jr.</div>
+        <div class="govt-agency-full">Office of the President of the Philippines</div>
+      </div>
+      <div>
+        <div class="govt-status-item">Issued immediate directive to all agencies to respond</div>
+        <div class="govt-status-item">Declared state of national calamity for affected regions</div>
+        <div class="govt-status-item">Presided over national inter-agency emergency meetings</div>
+      </div>
+    </div>
+
+    <div class="govt-card urgent">
+      <div>
+        <div class="govt-card-label govt-label-urgent">🔴 Coordination</div>
+        <div class="govt-agency-name">NDRRMC / OCD</div>
+        <div class="govt-agency-full">National Disaster Risk Reduction & Management Council</div>
+      </div>
+      <div>
+        <div class="govt-status-item">Real-time disaster monitoring across all 4 affected regions</div>
+        <div class="govt-status-item">Coordinating SRR operations with AFP and PNP</div>
+        <div class="govt-status-item">Managing 75,324 affected families database</div>
+      </div>
+    </div>
+
+    <div class="govt-card active">
+      <div>
+        <div class="govt-card-label govt-label-active">🟦 Welfare & Aid</div>
+        <div class="govt-agency-name">DSWD</div>
+        <div class="govt-agency-full">Dept of Social Welfare & Development</div>
+      </div>
+      <div>
+        <div class="govt-status-item">Released ₱124.9M in humanitarian assistance</div>
+        <div class="govt-status-item">Distributed 125K food packs; transitioning to ECT</div>
+        <div class="govt-status-item">4 mobile kitchens + water filtration deployed</div>
+      </div>
+      <div class="govt-funding">₱124.9M released</div>
+    </div>
+
+    <div class="govt-card active">
+      <div>
+        <div class="govt-card-label govt-label-active">🟦 Education</div>
+        <div class="govt-agency-name">DepEd (Sec. Angara)</div>
+        <div class="govt-agency-full">Department of Education</div>
+      </div>
+      <div>
+        <div class="govt-status-item">Rapid disaster response directive for Mindanao schools</div>
+        <div class="govt-status-item">Activated ₱3B Quick Response Fund for repairs</div>
+        <div class="govt-status-item">Assessment: ₱43.9M repairs + ₱7.79M cleanup needed</div>
+      </div>
+      <div class="govt-funding">₱3B QRF activated</div>
+    </div>
+
+    <div class="govt-card completed">
+      <div>
+        <div class="govt-card-label govt-label-completed">✅ Energy</div>
+        <div class="govt-agency-name">DOE / NGCP</div>
+        <div class="govt-agency-full">Dept of Energy · National Grid Corp. of Philippines</div>
+      </div>
+      <div>
+        <div class="govt-status-item">Restored all power transmission lines (June 9, 1:38 PM)</div>
+        <div class="govt-status-item">South Cotabato, Sarangani, GenSan fully restored</div>
+        <div class="govt-status-item">Hospital power confirmed back online across all facilities</div>
+      </div>
+    </div>
+
+    <div class="govt-card active">
+      <div>
+        <div class="govt-card-label govt-label-active">🟦 Infrastructure</div>
+        <div class="govt-agency-name">DPWH</div>
+        <div class="govt-agency-full">Dept of Public Works & Highways</div>
+      </div>
+      <div>
+        <div class="govt-status-item">Assessing 45 road sections and 8 bridges</div>
+        <div class="govt-status-item">Emergency clearing operations underway on key routes</div>
+        <div class="govt-status-item">GenSan Airport damage assessment coordinated with DOTC</div>
+      </div>
+    </div>
+
+    <div class="govt-card active">
+      <div>
+        <div class="govt-card-label govt-label-active">🟦 Health</div>
+        <div class="govt-agency-name">DOH</div>
+        <div class="govt-agency-full">Department of Health</div>
+      </div>
+      <div>
+        <div class="govt-status-item">Mobile medical teams deployed to evacuation centres</div>
+        <div class="govt-status-item">Trauma surgeons and emergency medicines pre-positioned</div>
+        <div class="govt-status-item">Disease surveillance active — water safety monitoring in Sarangani</div>
+      </div>
+    </div>
+
+    <div class="govt-card monitoring">
+      <div>
+        <div class="govt-card-label govt-label-monitoring">🟡 Science</div>
+        <div class="govt-agency-name">PHIVOLCS</div>
+        <div class="govt-agency-full">Philippine Institute of Volcanology & Seismology</div>
+      </div>
+      <div>
+        <div class="govt-status-item">Recorded 130+ aftershocks including Mag. 6.7</div>
+        <div class="govt-status-item">Warning: aftershocks may continue for 1+ month</div>
+        <div class="govt-status-item">Maintaining 24/7 seismic monitoring across Mindanao</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== CRISIS TIMELINE ===== -->
+  <div class="two-col" style="margin-top: 40px;">
+    <div>
+      <div class="section-heading">
+        <div class="section-icon" style="background:#E1EFF0;">⏱️</div>
+        <div>
+          <h2>Crisis timeline</h2>
+          <p>Key events, hour by hour</p>
+        </div>
+      </div>
+      <div class="timeline">
+        <div class="timeline-event">
+          <div class="timeline-dot tl-red"></div>
+          <div class="timeline-time">Jun 8 · 7:37 AM — Day 0</div>
+          <div class="timeline-title">M7.8 earthquake strikes Mindanao</div>
+          <div class="timeline-desc">Epicentre 26km SW of Kablalan, Sarangani, Celebes Sea, depth 55km. Strikes during school opening-day flag ceremonies. Tsunami alert immediately issued.</div>
+          <span class="timeline-tag sev-critical">Onset</span>
+        </div>
+        <div class="timeline-event">
+          <div class="timeline-dot tl-red"></div>
+          <div class="timeline-time">Jun 8 · Morning</div>
+          <div class="timeline-title">Tsunami alert issued; building collapses reported</div>
+          <div class="timeline-desc">PHIVOLCS and NDRRMC issue tsunami warning for coastal Mindanao. Buildings collapse in General Santos City. Landslides cut off barangays.</div>
+          <span class="timeline-tag sev-critical">Response</span>
+        </div>
+        <div class="timeline-event">
+          <div class="timeline-dot tl-orange"></div>
+          <div class="timeline-time">Jun 8 · Midday</div>
+          <div class="timeline-title">President Marcos Jr. activates emergency response</div>
+          <div class="timeline-desc">Presidential directive to all agencies. OCD, AFP, PNP mobilise SRR teams. DSWD activates pre-positioned relief. DOE begins power restoration operations.</div>
+          <span class="timeline-tag sev-high">Mobilisation</span>
+        </div>
+        <div class="timeline-event">
+          <div class="timeline-dot tl-teal"></div>
+          <div class="timeline-time">Jun 9 · 1:38 PM — Day 1</div>
+          <div class="timeline-title">Power transmission fully restored by NGCP</div>
+          <div class="timeline-desc">National Grid restores all transmission lines across South Cotabato, Sarangani, and General Santos City. Hospital power confirmed back online.</div>
+          <span class="timeline-tag sev-improving">Milestone</span>
+        </div>
+        <div class="timeline-event">
+          <div class="timeline-dot tl-orange"></div>
+          <div class="timeline-time">Jun 9 · Day 1</div>
+          <div class="timeline-title">M6.7 aftershock hits; 130+ aftershocks total</div>
+          <div class="timeline-desc">Strong aftershock causes additional damage and panic. PHIVOLCS confirms more than 130 aftershocks. Warns public to expect continued tremors for a month+.</div>
+          <span class="timeline-tag sev-high">Setback</span>
+        </div>
+        <div class="timeline-event">
+          <div class="timeline-dot tl-yellow"></div>
+          <div class="timeline-time">Jun 10 · Day 2</div>
+          <div class="timeline-title">346,449 individuals confirmed affected; 3,515 families in evacuation centres</div>
+          <div class="timeline-desc">NDRRMC updates national damage assessment. DSWD activates mobile kitchens. Food pack distribution intensifies. Death toll climbs past 41.</div>
+          <span class="timeline-tag sev-medium">Assessment</span>
+        </div>
+        <div class="timeline-event">
+          <div class="timeline-dot tl-teal"></div>
+          <div class="timeline-time">Jun 11–15 · Days 3–7</div>
+          <div class="timeline-title">DSWD releases ₱124.9M; 125K food packs distributed</div>
+          <div class="timeline-desc">Humanitarian aid scales up. DepEd surveyed: 1,378 schools damaged, 3,500+ still closed. DepEd QRF of ₱3B activated. GenSan Airport assessment continues.</div>
+          <span class="timeline-tag sev-improving">Recovery Phase</span>
+        </div>
+        <div class="timeline-event">
+          <div class="timeline-dot tl-green"></div>
+          <div class="timeline-time">Jun 16 · Day 8 (Today)</div>
+          <div class="timeline-title">Focus shifts to displaced families & school recovery</div>
+          <div class="timeline-desc">Government ends formal rescue phase. 818 schools reopened. DSWD transitions to ECT cash transfers. Reconstruction planning begins. Aftershocks continue.</div>
+          <span class="timeline-tag sev-improving">Recovery Active</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Media Coverage Column -->
+    <div>
+      <div class="section-heading">
+        <div class="section-icon" style="background:#E1EFF0;">📰</div>
+        <div>
+          <h2>Media coverage intelligence</h2>
+          <p>Sourced from Meltwater Mira · Jun 8–16</p>
+        </div>
+      </div>
+
+      <!-- Volume Chart -->
+      <div class="chart-card" style="margin-bottom: 16px;">
+        <div class="chart-title">Daily mention volume</div>
+        <div class="chart-sub">Philippines earthquake across global news & social media</div>
+        <div class="chart-wrap" style="height:180px;">
+          <canvas id="volumeChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Sentiment + Sources -->
+      <div class="two-col">
+        <div class="chart-card">
+          <div class="chart-title">Sentiment split</div>
+          <div class="chart-sub">All media coverage</div>
+          <div class="chart-wrap" style="height:140px;">
+            <canvas id="sentimentChart"></canvas>
+          </div>
+          <ul class="sentiment-list" style="margin-top:12px;">
+            <li class="sentiment-item">
+              <span class="sentiment-label"><span class="sentiment-swatch" style="background:#C62828;"></span>Negative / Crisis</span>
+              <span class="sentiment-pct">62%</span>
+            </li>
+            <li class="sentiment-item">
+              <span class="sentiment-label"><span class="sentiment-swatch" style="background:#F9A825;"></span>Neutral / Factual</span>
+              <span class="sentiment-pct">27%</span>
+            </li>
+            <li class="sentiment-item">
+              <span class="sentiment-label"><span class="sentiment-swatch" style="background:#28BBBB;"></span>Positive / Hopeful</span>
+              <span class="sentiment-pct">11%</span>
+            </li>
+          </ul>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">Top sources</div>
+          <div class="chart-sub">By reach & volume</div>
+          <ul class="source-list">
+            <li class="source-item"><span class="source-rank">1</span><div><div class="source-name">Rappler</div><div class="source-country">🇵🇭 Philippines</div></div><span class="source-reach">HIGH</span></li>
+            <li class="source-item"><span class="source-rank">2</span><div><div class="source-name">GMA News</div><div class="source-country">🇵🇭 Philippines</div></div><span class="source-reach">HIGH</span></li>
+            <li class="source-item"><span class="source-rank">3</span><div><div class="source-name">Inquirer.net</div><div class="source-country">🇵🇭 Philippines</div></div><span class="source-reach">HIGH</span></li>
+            <li class="source-item"><span class="source-rank">4</span><div><div class="source-name">NBC News</div><div class="source-country">🇺🇸 US</div></div><span class="source-reach">MED</span></li>
+            <li class="source-item"><span class="source-rank">5</span><div><div class="source-name">UN News</div><div class="source-country">🌐 Global</div></div><span class="source-reach">MED</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Narrative Themes -->
+      <div class="full-card" style="margin-top: 16px;">
+        <div class="chart-title" style="margin-bottom: 12px;">Top media narratives</div>
+        <ul class="crisis-items">
+          <li class="crisis-item"><span class="crisis-item-dot dot-red"></span><strong>"First day of school tragedy"</strong> — International framing of the human cost of quake striking during opening ceremonies; widely shared globally</li>
+          <li class="crisis-item"><span class="crisis-item-dot dot-orange"></span><strong>"Rescue race against time"</strong> — SRR operations coverage dominated Days 1–3; international wire services</li>
+          <li class="crisis-item"><span class="crisis-item-dot dot-orange"></span><strong>"Government mobilisation speed"</strong> — Mixed coverage: praise for NGCP's fast power restoration vs. criticism of structural failures in public buildings</li>
+          <li class="crisis-item"><span class="crisis-item-dot dot-teal"></span><strong>"Aid pours in"</strong> — DSWD food packs, UNHCR support, bilateral aid from Japan & Australia reported</li>
+          <li class="crisis-item"><span class="crisis-item-dot dot-teal"></span><strong>"School safety debate"</strong> — DepEd urged to demolish unsafe buildings; national conversation on quake-proofing public schools</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== STRATEGIC RECOMMENDATIONS ===== -->
+  <div class="section-heading" style="margin-top: 40px;">
+    <div class="section-icon" style="background:#E1EFF0;">💡</div>
+    <div>
+      <h2>Strategic recommendations</h2>
+      <p>Actions for communications, government liaison, and crisis monitoring teams</p>
+    </div>
+    <div class="section-rule"></div>
+  </div>
+
+  <div class="rec-grid">
+    <div class="rec-card urgent">
+      <div class="rec-num">01 · Urgent</div>
+      <div class="rec-title">Accelerate school safety communications</div>
+      <div class="rec-body">With 3,500 schools still closed and a national debate emerging around DepEd's building safety standards, government communications teams should proactively publish structural assessment timelines and a return-to-school roadmap. The "first day of school" framing will continue to dominate global coverage — proactive transparency reduces reputational risk for both DepEd and the Marcos administration.</div>
+    </div>
+    <div class="rec-card urgent">
+      <div class="rec-num">02 · Urgent</div>
+      <div class="rec-title">Address connectivity gaps in remote barangays</div>
+      <div class="rec-body">While NGCP restored transmission, barangay-level distribution gaps and damaged road access continue to isolate communities. DSWD and DOH need satellite comms and airlift logistics to reach areas cut off by landslides. Unserved populations represent both a humanitarian risk and a media risk — "abandoned communities" narratives are already emerging in regional Filipino media.</div>
+    </div>
+    <div class="rec-card">
+      <div class="rec-num">03 · Amplify</div>
+      <div class="rec-title">Highlight NGCP power restoration as a government win</div>
+      <div class="rec-body">Restoring power to all hospitals and key infrastructure within 30 hours is a significant crisis response achievement. Government communicators should amplify this milestone through official channels and social media — it provides a positive counter-narrative to the dominant crisis framing and demonstrates institutional competence during the emergency.</div>
+    </div>
+    <div class="rec-card">
+      <div class="rec-num">04 · Monitor</div>
+      <div class="rec-title">Monitor school collapse narrative for escalation</div>
+      <div class="rec-body">The "DepEd urged to demolish unsafe buildings" coverage carries long-tail reputational risk. If a school building collapses during an aftershock while students are present, the story escalates immediately to a national accountability crisis. Track DepEd's structural assessment announcements daily and pre-brief spokespeople for this scenario.</div>
+    </div>
+    <div class="rec-card watch">
+      <div class="rec-num">05 · Watch</div>
+      <div class="rec-title">GenSan Airport: track logistics impact on aid delivery</div>
+      <div class="rec-body">Major damage to General Santos International Airport is constraining the speed of incoming aid, international volunteers, and reconstruction materials. Monitor CAAP's repair timeline. If the airport remains closed beyond 2 weeks, expect critical reporting on relief bottlenecks — coordinate with DPWH and CAAP on a public-facing repair schedule.</div>
+    </div>
+    <div class="rec-card">
+      <div class="rec-num">06 · Opportunity</div>
+      <div class="rec-title">Leverage international solidarity for long-term rebuild narrative</div>
+      <div class="rec-body">Aid from Japan, Australia, and UN agencies presents an opportunity to frame this as a story of international solidarity. Government and media communications teams should publish regular "recovery scorecards" — tracking homes rebuilt, schools reopened, and families housed — converting crisis coverage into long-term resilience storytelling as the news cycle evolves.</div>
+    </div>
+  </div>
+
+  <!-- What to Watch -->
+  <div class="full-card" style="margin-top: 24px;">
+    <div class="chart-title" style="margin-bottom: 12px;">⚡ What to watch next</div>
+    <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
+      <div style="padding:12px; background:var(--danger-pale); border-radius:var(--r-md); border-left:3px solid var(--danger);">
+        <div style="font-size:11px; font-weight:700; color:#C62828; margin-bottom:4px;">🔴 IMMEDIATE</div>
+        <div style="font-size:12px; color:var(--fg-muted); line-height:1.5;">Another significant aftershock (PHIVOLCS: risk remains elevated for 30+ days) — potential secondary building collapses and displacement spike</div>
+      </div>
+      <div style="padding:12px; background:var(--warning-pale); border-radius:var(--r-md); border-left:3px solid var(--warning);">
+        <div style="font-size:11px; font-weight:700; color:#E65100; margin-bottom:4px;">🟡 THIS WEEK</div>
+        <div style="font-size:12px; color:var(--fg-muted); line-height:1.5;">DepEd return-to-school announcement expected — timeline for 3,500 still-closed schools. Congressional hearings on school building safety standards likely</div>
+      </div>
+      <div style="padding:12px; background:var(--bg-brand-soft); border-radius:var(--r-md); border-left:3px solid var(--mw-teal);">
+        <div style="font-size:11px; font-weight:700; color:var(--fg-brand); margin-bottom:4px;">🔵 NEXT 30 DAYS</div>
+        <div style="font-size:12px; color:var(--fg-muted); line-height:1.5;">Recovery and reconstruction phase begins — DSWD cash transfers shift centre of gravity. Watch for typhoon season intersection with displacement crisis</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Footer -->
+<footer class="dash-footer">
+  <div class="footer-left">
+    <span class="footer-logo">⬡ Meltwater</span>
+    <span>Issues & Crisis Report · Philippines Earthquake · Mindanao M7.8</span>
+    <span>·</span>
+    <span>Coverage period: 8 Jun – 16 Jun 2026</span>
+    <span>·</span>
+    <span>Powered by Mira AI Intelligence</span>
+  </div>
+  <div class="footer-right">For internal use only · Human review required before implementation</div>
+</footer>
+
+<script>
+// Volume Chart
+const volCtx = document.getElementById('volumeChart').getContext('2d');
+new Chart(volCtx, {
+  type: 'bar',
+  data: {
+    labels: ['Jun 8', 'Jun 9', 'Jun 10', 'Jun 11', 'Jun 12', 'Jun 13', 'Jun 14', 'Jun 15', 'Jun 16'],
+    datasets: [{
+      data: [18400, 24200, 15800, 11200, 8400, 6200, 5400, 4900, 4100],
+      backgroundColor: [
+        '#C62828', '#EF5350', '#E65100', '#F57C00',
+        '#28BBBB', '#28BBBB', '#1C7070', '#1C7070', '#A3DFDF'
+      ],
+      borderRadius: 4,
+      borderSkipped: false,
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { legend: { display: false }, tooltip: {
+      callbacks: {
+        label: (c) => ` ${c.raw.toLocaleString()} mentions`
+      }
+    }},
+    scales: {
+      x: { grid: { display: false }, ticks: { font: { family: 'Poppins', size: 10 }, color: '#8A9494' }},
+      y: { grid: { color: '#E8EDED' }, ticks: { font: { family: 'Poppins', size: 10 }, color: '#8A9494',
+        callback: (v) => v >= 1000 ? `${v/1000}K` : v
+      }}
+    }
+  }
+});
+
+// Sentiment Chart
+const sentCtx = document.getElementById('sentimentChart').getContext('2d');
+new Chart(sentCtx, {
+  type: 'doughnut',
+  data: {
+    labels: ['Negative / Crisis', 'Neutral / Factual', 'Positive / Hopeful'],
+    datasets: [{
+      data: [62, 27, 11],
+      backgroundColor: ['#C62828', '#F9A825', '#28BBBB'],
+      borderWidth: 3,
+      borderColor: '#fff',
+      hoverOffset: 4
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    cutout: '68%',
+    plugins: {
+      legend: { display: false },
+      tooltip: { callbacks: { label: (c) => ` ${c.label}: ${c.parsed}%` }}
+    }
+  }
+});
+</script>
+
+</body>
+</html>
